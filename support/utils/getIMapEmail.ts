@@ -1,11 +1,10 @@
-import * as pop3 from 'yapople';
 import Imap from 'imap';
 import { simpleParser } from 'mailparser';
-import { emailSettings, IimapServer, Ipop3Server } from "../constants/email";
-import { findPin, IEmailPin } from "./emailUtils"
+import { emailSettings, IServerImap } from '../constants/email';
+import { findPin, IEmailPin } from './emailUtils'
 
 class imap_email {
-  private server: IimapServer;
+  private server: IServerImap;
   private email: IEmailPin;
 
   constructor() {
@@ -13,22 +12,20 @@ class imap_email {
       host: emailSettings.imap.host,
       port: emailSettings.imap.port,
       tls: emailSettings.imap.secure,
-      user: emailSettings.authentication.username,
-      password: emailSettings.authentication.password
+      user: emailSettings.imap.authentication.username,
+      password: emailSettings.imap.authentication.password
     };
     this.email = {
       pin: '',
-      inText: false,
       inHTML: false,
     };
   }
 
-  processEmail = async ( subject: string, textEmail: string, htmlEmail: string ) => {
+  processEmail = async ( subject: string, htmlEmail: string ) => {
     // Because the IMAP library uses events, this is needed to make it work properly sequentially
-    const emailPin = await findPin( subject, textEmail, htmlEmail );
+    const emailPin = await findPin( subject, htmlEmail );
     this.email = {
       pin: emailPin.pin,
-      inText: emailPin.inText,
       inHTML: emailPin.inHTML,
     };
     return true;
@@ -41,7 +38,7 @@ class imap_email {
         msg.on( 'body', stream => {
           simpleParser( stream, async ( err, parsed ) => {
             const { subject, textAsHtml, text } = parsed;
-            const endFlag2 = await this.processEmail( subject, text, textAsHtml );
+            const endFlag2 = await this.processEmail( subject, textAsHtml );
             if ( endFlag2 ) { resolve(true); }
           } );
         } )
@@ -91,58 +88,11 @@ class imap_email {
   }
 }
 
-class pop3_email {
-  private server: Ipop3Server;
-  private email: IEmailPin;
-
-  constructor() {
-    this.server = {
-      host: emailSettings.pop3.host,
-      port: emailSettings.pop3.port,
-      tls: emailSettings.pop3.secure,
-      username: emailSettings.authentication.username,
-      password: emailSettings.authentication.password,
-      mailparser: true,
-    };
-    this.email = {
-      pin: '',
-      inText: false,
-      inHTML: false,
-    };
-  }
-
-  getPop3Email = async ( messages ) => {
-    messages.forEach( async ( message ) => {
-      this.email = await findPin( message.subject, message.text, message.html );
-    } );
-  }
-  getMail = async (): Promise<IEmailPin> => {
-    try {
-      const client = new pop3.Client( this.server );
-      await client.connect();
-      const messages = await client.retrieveAll();
-      await this.getPop3Email( messages );
-      await client.quit();
-      return Promise.resolve( this.email );
-    } catch ( err ) {
-      console.log( err );
-      return Promise.reject( err );
-    }
-  };
-}
-
-export class getEmail {
+export class getEmailImap {
   private mailbox;
-  constructor( mailType: string ) {
-    console.log('NEW getEmail');
-    if ( mailType.toLowerCase() === 'pop3' ) {
-      this.mailbox = new pop3_email();
-      console.log('Using: POP3');
-    }
-    if ( mailType.toLowerCase() === 'imap' ) {
-      this.mailbox = new imap_email();
-      console.log('Using: IMAP');
-    }
+  constructor() {
+    console.log('Accessing IMap');
+    this.mailbox = new imap_email();
   }
 
   public getPin = async (): Promise<IEmailPin> => {

@@ -1,16 +1,30 @@
+import { mailbox } from './constants/email';
 import { IEmailPin } from './utils/emailUtils';
-import { getEmail } from './utils/getEmail'
+import { getEmailImap } from './utils/getIMapEmail'
+import { getEmailPOP3 } from './utils/getPOP3Email'
+import { getEmailSlurp } from './utils/getMailSlurpEmail'
 
 export async function findPin(): Promise<IEmailPin> {
-  const findEmail= new getEmail( 'imap' );
-  const email = await findEmail.getPin();
-  return email;
+  let findEmail = null;
+  if (mailbox === 'imap') {
+    findEmail = new getEmailImap();
+  }
+
+  if (mailbox === 'pop3') {
+    findEmail = new getEmailPOP3();
+  }
+
+  if (mailbox === 'slurp') {
+    findEmail = new getEmailSlurp();
+  }
+  
+  if (findEmail !== null && findEmail !== undefined) {
+    const email = await findEmail.getPin();
+    return email;
+  }
 }
 
 export async function isPinFound(): Promise<boolean> {
   const email = await findPin();
-  if (email.inText && email.inHTML) {
-    return true;
-  }
-  return false
+  return email.inHTML;
 }
