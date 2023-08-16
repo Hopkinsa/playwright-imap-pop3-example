@@ -8,7 +8,7 @@ If you choose to use either service please be aware that third party services ma
 
 Just use `npm install`
 
-Note: Node.js version 12 or higher is required to use Playwright. It won't install correctly on older Node versions
+**Note:** Node.js version 12 or higher is required to use Playwright. It won't install correctly on older Node versions
 
 ## How to configure
 
