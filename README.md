@@ -1,6 +1,6 @@
 # Playwright example for getting strings from IMAP or POP3 email
 
-This example uses the fake email servers from [ethereal.email](https://ethereal.email/) and [mailslurp.com](https://www.mailslurp.com).
+This example uses the email servers from [ethereal.email](https://ethereal.email/) and [mailslurp.com](https://www.mailslurp.com).
 
 If you choose to use either service please be aware that third party services may regularly empty the inboxes.
 
@@ -45,7 +45,7 @@ export const emailSettings = {
     authentication: {
       username: 'EMAIL USERNAME',
       password: 'EMAIL PASSWORD'
-    },    
+    },
   },
   mailSlurp: {
     api: 'API KEY FROM mailslurp.com',
@@ -102,7 +102,7 @@ Run `npm run start:dev` to execute the code to retrieve emails.
 
 ## Running the Playwright test
 
-Run `npm run test-all` to run all Playwright tests.  
+Run `npm run test-all` to run all Playwright tests.
 
 Run `TEST=<name> npm run test-one` to start a single Playwright test. For example, `TEST=email npm run test-one` will only run the tests in `email.spec.ts`.
 
